@@ -1,0 +1,1 @@
+export default function Loading() { return <main className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6"><div className="flex items-center gap-3 text-sm text-muted-foreground" role="status"><span className="size-2 animate-pulse rounded-full bg-primary" />Loading StillaCon...</div></main> }
