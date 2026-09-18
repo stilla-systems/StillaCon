@@ -22,7 +22,7 @@ export default async function Plans() {
     ? livePlans.map((item) => ({
         ...item,
         priceLabel: `GHS ${Number(item.price).toFixed(2)}`,
-        duration: `${item.duration_days} days`,
+        duration: `${item.duration_days} day${item.duration_days === 1 ? "" : "s"}`,
         ...(planCopy[item.name] ?? { speed: "Managed access", label: "Reliable community access" }),
       }))
     : fallbackPlans.map((item) => ({ ...item, priceLabel: item.price }))
