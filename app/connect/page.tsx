@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 
 export default function Connect() {
   const searchParams = useSearchParams()
-  const planName = searchParams.get("plan") ?? "Monthly"
+  const planName = searchParams.get("plan") ?? "1 Month"
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
