@@ -7,9 +7,14 @@ function makeCustomerNumber() {
 export async function ensureCustomerRecord(user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> | null }) {
   const db = createAdminClient()
   const metadata = user.user_metadata ?? {}
-  const fullName = typeof metadata.full_name === "string" ? metadata.full_name.trim() : "StillaCon customer"
-  const phone = typeof metadata.phone === "string" ? metadata.phone.trim() : ""
   const email = user.email?.trim().toLowerCase() ?? ""
+  const emailName = email ? email.split("@")[0].replace(/[._-]+/g, " ").trim() : "StillaCon customer"
+  const fullName = typeof metadata.full_name === "string" && metadata.full_name.trim().length >= 2
+    ? metadata.full_name.trim()
+    : emailName || "StillaCon customer"
+  const phone = typeof metadata.phone === "string" && metadata.phone.trim()
+    ? metadata.phone.trim()
+    : "Not provided"
 
   const { data: byUser, error: userLookupError } = await db
     .from("customers")
@@ -19,8 +24,8 @@ export async function ensureCustomerRecord(user: { id: string; email?: string | 
   if (userLookupError) throw userLookupError
   if (byUser) return byUser
 
-  if (!email || !phone || fullName.length < 2) {
-    throw new Error("Customer profile information is incomplete")
+  if (!email) {
+    throw new Error("Authenticated user email is missing")
   }
 
   const { data: byEmail, error: emailLookupError } = await db
