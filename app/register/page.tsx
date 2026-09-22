@@ -1,2 +1,6 @@
-import Link from "next/link"
-export default function Register() { return <main className="grid min-h-screen place-items-center px-5"><div className="glass w-full max-w-md rounded-2xl p-7"><Link href="/" className="text-xs font-bold tracking-[.2em] text-primary">STILLA CONNECT</Link><h1 className="mt-8 text-2xl font-semibold">Create your account.</h1><p className="mt-2 text-sm text-muted-foreground">Get started with managed community Internet.</p><form className="mt-7 flex flex-col gap-4"><label className="flex flex-col gap-2 text-xs font-medium">Full name<input className="h-10 rounded-lg border border-input bg-background/50 px-3 text-sm outline-none focus:border-primary" placeholder="Kwame Mensah" /></label><label className="flex flex-col gap-2 text-xs font-medium">Phone number<input className="h-10 rounded-lg border border-input bg-background/50 px-3 text-sm outline-none focus:border-primary" placeholder="+233 24 000 0000" /></label><label className="flex flex-col gap-2 text-xs font-medium">Email<input className="h-10 rounded-lg border border-input bg-background/50 px-3 text-sm outline-none focus:border-primary" placeholder="you@example.com" /></label><button className="mt-2 h-10 rounded-lg bg-primary text-sm font-medium text-primary-foreground">Create account</button></form><p className="mt-6 text-center text-xs text-muted-foreground">Already registered? <Link href="/login" className="text-primary">Sign in</Link></p></div></main> }
+import { RegisterForm } from "@/components/auth-forms"
+
+export default function Register() {
+  return <RegisterForm />
+}
+
