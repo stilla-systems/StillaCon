@@ -4,13 +4,15 @@ type AnimatedWifiProps = {
   size?: number
   className?: string
   label?: string
+  signalStrength?: number
 }
 
-export function AnimatedWifi({ size = 56, className, label = "Wi-Fi signal" }: AnimatedWifiProps) {
+export function AnimatedWifi({ size = 56, className, label = "Wi-Fi signal", signalStrength = 4 }: AnimatedWifiProps) {
   return (
     <span
       role="img"
       aria-label={label}
+      data-signal-strength={signalStrength}
       className={cn("animated-wifi inline-flex shrink-0 text-primary", className)}
       style={{ width: size, height: size }}
     >
