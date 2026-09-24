@@ -1,62 +1,50 @@
 "use client"
 
-import { useEffect, useRef, useState, type TouchEvent } from "react"
-import { CalendarDays, Gauge, KeyRound, LockKeyhole, Network, ShieldCheck } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Gauge, KeyRound, LockKeyhole, Network, ShieldCheck, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const features = [
-  { number: "01", title: "Made for real life", description: "From work calls to family streaming, get a connection designed around your day.", icon: Network },
-  { number: "02", title: "Reliable by design", description: "Managed connectivity with transparent plans and support when you need it.", icon: ShieldCheck },
-  { number: "03", title: "Simple access", description: "Choose your plan, pay securely and manage your connection from one place.", icon: KeyRound },
-  { number: "04", title: "High-speed performance", description: "Up to 125 Mbps for browsing, work, streaming and everyday digital life.", icon: Gauge },
-  { number: "05", title: "Secure by design", description: "Your account, devices and access stay organized in one secure experience.", icon: LockKeyhole },
-  { number: "06", title: "Flexible plans", description: "Choose 24-hour, weekly or monthly access based on your needs.", icon: CalendarDays },
+  { title: "Fast & Reliable", description: "Enjoy dependable high-speed internet powered by a professional connectivity infrastructure.", icon: Network },
+  { title: "Unlimited Access", description: "Stay connected throughout your active plan without worrying about traditional data limits.", icon: Gauge },
+  { title: "Simple Plans", description: "Choose a plan that fits your needs and activate your connection in just a few steps.", icon: SlidersHorizontal },
+  { title: "Secure Access", description: "Your connection is protected with controlled access designed for registered StillaCon customers.", icon: ShieldCheck },
+  { title: "Flexible Connectivity", description: "Connect from supported locations and stay online when you need reliable internet access.", icon: LockKeyhole },
+  { title: "Easy Management", description: "Manage your plan, payments, connection status and access details from one simple dashboard.", icon: KeyRound },
 ]
 
 export function StillaconFeatureShowcase() {
   const [active, setActive] = useState(0)
-  const [paused, setPaused] = useState(false)
-  const touchStart = useRef<number | null>(null)
 
   useEffect(() => {
-    if (paused) return
-    const timer = window.setInterval(() => setActive((current) => (current + 1) % features.length), 4500)
+    const timer = window.setInterval(() => setActive((current) => (current + 1) % features.length), 4200)
     return () => window.clearInterval(timer)
-  }, [paused, active])
+  }, [])
 
-  function choose(index: number) {
-    setActive(index)
-    setPaused(true)
-    window.setTimeout(() => setPaused(false), 4500)
-  }
+  const visible = [0, 1, 2].map((offset) => features[(active + offset) % features.length])
 
-  function onTouchStart(event: TouchEvent<HTMLDivElement>) {
-    touchStart.current = event.touches[0]?.clientX ?? null
-    setPaused(true)
-  }
-
-  function onTouchEnd(event: TouchEvent<HTMLDivElement>) {
-    if (touchStart.current === null) return
-    const delta = (event.changedTouches[0]?.clientX ?? touchStart.current) - touchStart.current
-    if (Math.abs(delta) > 40) choose((active + (delta < 0 ? 1 : features.length - 1)) % features.length)
-    else setPaused(false)
-    touchStart.current = null
-  }
-
-  const feature = features[active]
-  const Icon = feature.icon
-
-  return <div className="glass relative overflow-hidden rounded-[2rem] p-6 sm:p-8" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} aria-roledescription="carousel" aria-label="StillaCon features">
-    <div className="flex items-center justify-between text-[10px] font-bold tracking-[.2em] text-primary"><span>STILLACON</span><span>{feature.number} / 06</span></div>
-    <div className="relative mt-10 min-h-[190px] sm:min-h-[170px]" aria-live="polite">
-      <div key={feature.number} className="animate-feature-in">
-        <div className="grid size-16 place-items-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-[0_0_32px_rgba(39,182,246,.16)]"><Icon className="size-8" aria-hidden="true" /></div>
-        <h2 className="mt-7 text-2xl font-semibold tracking-[-.04em] text-balance sm:text-3xl">{feature.title}</h2>
-        <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">{feature.description}</p>
-      </div>
+  return <section className="relative mt-10 overflow-hidden rounded-[2rem] py-2" aria-labelledby="feature-showcase-heading">
+    <div className="feature-ambient pointer-events-none absolute left-1/2 top-1/2 -z-10 size-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full" />
+    <div className="mb-7 max-w-2xl">
+      <p className="text-[10px] font-bold tracking-[.22em] text-primary">BUILT FOR BETTER CONNECTIVITY</p>
+      <h2 id="feature-showcase-heading" className="mt-3 text-2xl font-semibold tracking-[-.04em] text-balance md:text-3xl">Everything You Need to Stay Connected</h2>
     </div>
-    <div className="mt-8 flex items-center gap-2" role="tablist" aria-label="Choose a feature">
-      {features.map((item, index) => <button key={item.number} type="button" role="tab" aria-selected={index === active} aria-label={`Show feature ${item.number}: ${item.title}`} onClick={() => choose(index)} className={cn("h-2 rounded-full bg-primary/20 transition-[width,background-color]", index === active ? "w-10 bg-primary" : "w-2 hover:bg-primary/60")}><span className="sr-only">{item.title}</span></button>)}
+    <div className="grid gap-4 md:grid-cols-3" aria-live="polite">
+      {visible.map((feature, index) => {
+        const Icon = feature.icon
+        const isActive = index === 0
+        return <article key={`${feature.title}-${active}`} className={cn("feature-glass group relative min-h-[218px] rounded-[1.5rem] p-6 transition-all duration-300 hover:-translate-y-1", isActive && "feature-glass-active")}>
+          <div className="flex items-start justify-between">
+            <div className="feature-icon grid size-11 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all duration-300 group-hover:shadow-[0_0_28px_rgba(39,182,246,.2)]"><Icon className="size-5" aria-hidden="true" /></div>
+            {isActive && <span className="feature-indicator mt-2 size-1.5 rounded-full bg-primary" aria-label="Active feature" />}
+          </div>
+          <h3 className="mt-7 text-lg font-semibold tracking-[-.025em]">{feature.title}</h3>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{feature.description}</p>
+        </article>
+      })}
     </div>
-  </div>
+    <div className="mt-6 flex items-center gap-2" role="tablist" aria-label="Feature showcase position">
+      {features.map((feature, index) => <button key={feature.title} type="button" role="tab" aria-selected={index === active} aria-label={`Show ${feature.title}`} onClick={() => setActive(index)} className={cn("h-1.5 rounded-full bg-primary/20 transition-all duration-300", index === active ? "w-8 bg-primary" : "w-1.5 hover:bg-primary/60")}><span className="sr-only">{feature.title}</span></button>)}
+    </div>
+  </section>
 }
