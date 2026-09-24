@@ -3,12 +3,14 @@ import { cn } from "@/lib/utils"
 type AnimatedWifiProps = {
   size?: number
   className?: string
+  label?: string
 }
 
-export function AnimatedWifi({ size = 28, className }: AnimatedWifiProps) {
+export function AnimatedWifi({ size = 56, className, label = "Wi-Fi signal" }: AnimatedWifiProps) {
   return (
     <span
-      aria-hidden="true"
+      role="img"
+      aria-label={label}
       className={cn("animated-wifi inline-flex shrink-0 text-primary", className)}
       style={{ width: size, height: size }}
     >
