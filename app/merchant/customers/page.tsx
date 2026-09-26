@@ -1,2 +1,7 @@
 import { MerchantCustomers } from "@/components/merchant-experience"
-export default function MerchantCustomersPage() { return <MerchantCustomers /> }
+import { requireMerchantAccess } from "@/lib/merchant-auth"
+
+export default async function MerchantCustomersPage() {
+  await requireMerchantAccess("/merchant/customers")
+  return <MerchantCustomers />
+}

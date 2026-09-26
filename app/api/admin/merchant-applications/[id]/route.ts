@@ -17,14 +17,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { id } = await params
   const body = await request.json().catch(() => ({}))
-  const nextStatus = body.status as string
-  const reason = typeof body.reason === "string" ? body.reason.trim() : ""
-  if (!transitions[body.previousStatus]?.includes(nextStatus)) return NextResponse.json({ error: "Invalid status transition" }, { status: 400 })
-  if ((nextStatus === "REJECTED" || nextStatus === "REQUESTED_INFORMATION") && !reason) return NextResponse.json({ error: "A reason is required" }, { status: 400 })
+  const nextStatus = typeof body.status === "string" ? body.status : ""
+  const reason = typeof body.reason === "string" ? body.reason.trim().slice(0, 500) : ""
 
   const admin = createAdminClient()
   const { data: application, error: readError } = await admin.from("merchant_applications").select("id, application_number, applicant_user_id, full_name, business_name, phone, email, business_address, city, region, country, connectivity_provider, connectivity_plan, equipment_description, intended_service_area, status, merchant_id").eq("id", id).single()
-  if (readError || !application || application.status !== body.previousStatus) return NextResponse.json({ error: "Application changed or not found" }, { status: 409 })
+  if (readError || !application) return NextResponse.json({ error: "Application changed or not found" }, { status: 409 })
+  const previousStatus = application.status as string
+  if (!transitions[previousStatus]?.includes(nextStatus)) return NextResponse.json({ error: "Invalid status transition" }, { status: 400 })
+  if ((nextStatus === "REJECTED" || nextStatus === "REQUESTED_INFORMATION") && !reason) return NextResponse.json({ error: "A reason is required" }, { status: 400 })
 
   let merchantId = application.merchant_id
   if (nextStatus === "APPROVED" && !merchantId) {
@@ -33,10 +34,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     merchantId = merchant.id
     await admin.from("user_roles").upsert({ user_id: application.applicant_user_id, role: "MERCHANT" }, { onConflict: "user_id,role" })
   }
-  const { error: updateError } = await admin.from("merchant_applications").update({ status: nextStatus, merchant_id: merchantId, reviewed_at: new Date().toISOString(), reviewed_by: user.id, verification_information: reason ? { review_request: reason } : undefined }).eq("id", id).eq("status", body.previousStatus)
+  const { error: updateError } = await admin.from("merchant_applications").update({ status: nextStatus, merchant_id: merchantId, reviewed_at: new Date().toISOString(), reviewed_by: user.id, verification_information: reason ? { review_request: reason } : undefined }).eq("id", id).eq("status", previousStatus)
   if (updateError) return NextResponse.json({ error: "Could not update application" }, { status: 500 })
   const action = nextStatus === "UNDER_REVIEW" ? "MERCHANT_APPLICATION_REVIEW_STARTED" : nextStatus === "APPROVED" ? "MERCHANT_APPLICATION_APPROVED" : nextStatus === "REJECTED" ? "MERCHANT_APPLICATION_REJECTED" : "MERCHANT_APPLICATION_INFORMATION_REQUESTED"
-  await admin.from("audit_logs").insert({ actor_id: user.id, action, resource_type: "merchant_application", resource_id: id, metadata: { application_id: id, merchant_id: merchantId, previous_status: body.previousStatus, new_status: nextStatus, reason: reason || null } })
+  await admin.from("audit_logs").insert({ actor_id: user.id, action, resource_type: "merchant_application", resource_id: id, metadata: { application_id: id, merchant_id: merchantId, previous_status: previousStatus, new_status: nextStatus, reason: reason || null } })
   if (nextStatus === "APPROVED" && merchantId) await admin.from("audit_logs").insert({ actor_id: user.id, action: "MERCHANT_ACTIVATED", resource_type: "merchant", resource_id: merchantId, metadata: { application_id: id, merchant_id: merchantId } })
   return NextResponse.json({ ok: true, status: nextStatus, merchantId })
 }
