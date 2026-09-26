@@ -41,8 +41,9 @@ export function ApplyForm() {
       setPending(false)
       return
     }
+    const applicationNumber = `APP-${Date.now()}`
     const { error } = await supabase.from("merchant_applications").insert({
-      application_number: `APP-${Date.now()}`,
+      application_number: applicationNumber,
       applicant_user_id: user.id,
       full_name: form.get("full-name"),
       business_name: form.get("business-name"),
